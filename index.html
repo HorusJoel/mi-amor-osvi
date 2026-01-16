@@ -146,25 +146,6 @@
         transform: scale(0.95);
       }
     }
-
-    /* Pantalla de carga personalizada */
-    #loading {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-      color: white;
-      font-size: 1.8rem;
-      text-align: center;
-      opacity: 1;
-      transition: opacity 0.5s;
-      font-family: Georgia, serif;
-      letter-spacing: 1px;
-    }
   </style>
 </head>
 <body>
@@ -179,15 +160,11 @@
     <div class="grows">y crece cada segundo</div>
   </div>
 
-  <!-- Audio oculto con precarga -->
-  <audio id="bgMusic" loop preload="auto">
+  <!-- Audio oculto -->
+  <audio id="bgMusic" loop>
     <source src="veo-en-ti-la-luz.mp3" type="audio/mpeg">
+    Tu navegador no soporta audio.
   </audio>
-
-  <!-- Pantalla de espera personalizada -->
-  <div id="loading">
-    Espera un segundo, amor
-  </div>
 
   <script>
     // === Generar estrellas ===
@@ -221,6 +198,7 @@
       const counterText = `${days} días, ${hours} horas, ${minutes} minutos, ${seconds} segundos`;
       document.getElementById('counter').textContent = counterText;
 
+      // Intensidad creciente
       const intensity = Math.min(1, 0.55 + days * 0.01);
       const container = document.getElementById('counterContainer');
       container.style.textShadow = `0 0 ${30 * intensity}px rgba(255, 200, 80, ${intensity})`;
@@ -259,39 +237,18 @@
     }
     setInterval(createCantoya, 1800);
 
-    // === Música optimizada ===
+    // === Música automática tras primera interacción ===
     const bgMusic = document.getElementById('bgMusic');
-    const loadingScreen = document.getElementById('loading');
 
     function tryPlayMusic() {
-      bgMusic.play().then(() => {
-        if (loadingScreen) {
-          loadingScreen.style.opacity = '0';
-          setTimeout(() => {
-            loadingScreen.style.display = 'none';
-          }, 500);
-        }
-      }).catch(e => {
-        console.warn("No se pudo reproducir la música:", e);
+      bgMusic.play().catch(e => {
+        // Silencioso si falla (normal en primer carga)
       });
     }
 
+    // Intentar reproducir al hacer clic en cualquier parte
     document.addEventListener('click', tryPlayMusic, { once: true });
     document.addEventListener('touchstart', tryPlayMusic, { once: true });
-
-    // Opcional: si el audio ya está listo, desaparecer más rápido
-    bgMusic.addEventListener('canplaythrough', () => {
-      if (loadingScreen && getComputedStyle(loadingScreen).display !== 'none') {
-        setTimeout(() => {
-          if (loadingScreen) {
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-              loadingScreen.style.display = 'none';
-            }, 500);
-          }
-        }, 1500);
-      }
-    });
   </script>
 </body>
 </html>
