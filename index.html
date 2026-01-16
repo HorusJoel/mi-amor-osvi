@@ -59,30 +59,18 @@
     }
 
     .counter {
-      margin-top: 1rem;
+      margin-top: 0.8rem;
       font-size: 1.2rem;
       font-family: 'Arial', sans-serif;
     }
 
-    /* Botón de música */
-    #musicBtn {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      z-index: 20;
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 200, 100, 0.5);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 30px;
-      cursor: pointer;
-      font-family: Arial, sans-serif;
-      backdrop-filter: blur(5px);
-      transition: all 0.3s;
-    }
-
-    #musicBtn:hover {
-      background: rgba(255, 200, 100, 0.3);
+    .grows {
+      margin-top: 0.6rem;
+      font-size: 1.1rem;
+      opacity: 0.8;
+      font-style: italic;
+      letter-spacing: 1px;
+      transition: opacity 0.6s, text-shadow 0.6s;
     }
 
     /* Globo de Cantoya RECTANGULAR */
@@ -169,15 +157,12 @@
   <div class="counter-container" id="counterContainer">
     <div>Mi amor por ti lleva</div>
     <div class="counter" id="counter"></div>
+    <div class="grows">y crece cada segundo</div>
   </div>
-
-  <!-- Botón de música -->
-  <button id="musicBtn"> Reproducir Música</button>
 
   <!-- Audio oculto -->
   <audio id="bgMusic" loop>
-    <!--  Reemplaza esta URL con tu propia canción si quieres -->
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3a5e9f9b3d.mp3?filename=romantic-piano-music-121544.mp3" type="audio/mpeg">
+    <source src="veo-en-ti-la-luz.mp3" type="audio/mpeg">
     Tu navegador no soporta audio.
   </audio>
 
@@ -212,10 +197,16 @@
       const seconds = totalSeconds % 60;
       const counterText = `${days} días, ${hours} horas, ${minutes} minutos, ${seconds} segundos`;
       document.getElementById('counter').textContent = counterText;
+
+      // Intensidad creciente
       const intensity = Math.min(1, 0.55 + days * 0.01);
       const container = document.getElementById('counterContainer');
       container.style.textShadow = `0 0 ${30 * intensity}px rgba(255, 200, 80, ${intensity})`;
       container.style.opacity = intensity;
+
+      const growsText = document.querySelector('.grows');
+      growsText.style.opacity = intensity;
+      growsText.style.textShadow = `0 0 ${15 * intensity}px rgba(255, 200, 80, ${intensity})`;
     }
     setInterval(updateCounter, 1000);
     updateCounter();
@@ -246,29 +237,18 @@
     }
     setInterval(createCantoya, 1800);
 
-    // === Música ===
-    const musicBtn = document.getElementById('musicBtn');
+    // === Música automática tras primera interacción ===
     const bgMusic = document.getElementById('bgMusic');
 
-    musicBtn.addEventListener('click', () => {
-      if (bgMusic.paused) {
-        const playPromise = bgMusic.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              musicBtn.textContent = ' Pausar Música';
-            })
-            .catch(e => {
-              console.warn("No se pudo reproducir el audio:", e);
-              alert("No se pudo iniciar la música. ¿Bloqueador de audio?");
-            });
-        }
-      } else {
-        bgMusic.pause();
-        musicBtn.textContent = ' Reproducir Música';
-      }
-    });
+    function tryPlayMusic() {
+      bgMusic.play().catch(e => {
+        // Silencioso si falla (normal en primer carga)
+      });
+    }
+
+    // Intentar reproducir al hacer clic en cualquier parte
+    document.addEventListener('click', tryPlayMusic, { once: true });
+    document.addEventListener('touchstart', tryPlayMusic, { once: true });
   </script>
 </body>
-
 </html>
